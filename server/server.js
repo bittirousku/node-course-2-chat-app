@@ -19,22 +19,13 @@ app.use(express.static(publicPath));
 io.on("connection", (socket) => {
   console.log("New user connected");
 
-  // socket.emit("newEmail", {
-  //   from: "dick@ocp.com",
-  //   text: "I think you'd better do what he says, Mr. Kinney.",
-  //   createdAt: 2203
-  // });
-
   socket.on("createMessage", (msg) => {
-    socket.emit("newMessage", {
+    console.log(msg);
+    io.emit("newMessage", {  // io.emit sends it to everyone
       from: msg.from,
       text: msg.text,
-      createdAt: 666
+      createdAt: new Date().getTime()
     });
-  });
-
-  socket.on("createEmail", (newEmail) => {
-    console.log("createEmail:", newEmail);
   });
 
   socket.on("disconnect", () => {

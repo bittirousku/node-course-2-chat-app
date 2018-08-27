@@ -4,16 +4,6 @@ let socket = io(); // open up the web socket
 // for compatibility reasons
 socket.on("connect", function () {
   console.log("Connected to server.");
-
-  // socket.emit("createEmail", {
-  //   to: "dick@ocp.com",
-  //   text: "Dick, you are fired!"
-  // });
-  socket.emit("createMessage", {
-    from: "boss",
-    text: "Dick, you are fired!"
-  });
-
 });
 
 socket.on("disconnect", function () {
