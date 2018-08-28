@@ -31,13 +31,14 @@ io.on("connection", (socket) => {
     "New user joined the channel"
   ));
 
-  socket.on("createMessage", (msg) => {
+  socket.on("createMessage", (msg, callback) => {
     console.log(msg);
     // io.emit sends it to everyone
     io.emit("newMessage", generateMessage(
       msg.from,
       msg.text
     ));
+    callback("this is from the server.");
   });
 
   socket.on("disconnect", () => {
