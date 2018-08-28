@@ -19,6 +19,18 @@ app.use(express.static(publicPath));
 io.on("connection", (socket) => {
   console.log("New user connected");
 
+  socket.emit("newMessage", {
+    from: "Admin",
+    text: "Welcome to channel!",
+    createdAt: new Date().getTime()
+  });
+
+  socket.broadcast.emit("newMessage", {  // socket.broadcast sends it to everyone *else* (not self)
+    from: "Admin",
+    text: "New user joined the channel",
+    createdAt: new Date().getTime()
+  });
+
   socket.on("createMessage", (msg) => {
     console.log(msg);
     io.emit("newMessage", {  // io.emit sends it to everyone
