@@ -8,6 +8,7 @@ const socketIO = require("socket.io");
 
 const {generateMessage, generateLocationMessage} = require("./utils/message.js");
 const {isRealString} = require("./utils/validation.js");
+const {Users} = require("./utils/users.js");
 
 const publicPath = path.join(__dirname, "../public");
 const port = process.env.PORT;
@@ -15,6 +16,7 @@ const port = process.env.PORT;
 let app = express();
 let server = http.createServer(app);  // manually create http server
 let io = socketIO(server);
+let users = new Users();
 
 app.use(express.static(publicPath));
 
@@ -23,10 +25,15 @@ io.on("connection", (socket) => {
 
   socket.on("join", (params, callback) => {
     if (!isRealString(params.name) || !isRealString(params.channel)) {
-      callback("Name and room name are required.");
+      return callback("Name and room name are required.");
     }
     // join the channel:
     socket.join(params.channel);
+
+    // Update users list:
+    users.removeUser(socket.id);  // user can be in only one room??
+    users.addUser(socket.id, params.name, params.channel);
+    io.to(params.channel).emit("updateUserList", users.getUserList(params.channel));
 
     // socket.emit sends it to self:
     socket.emit("newMessage", generateMessage(
@@ -63,6 +70,15 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("User disconnected.");
+    let user = users.removeUser(socket.id);
+
+    if (user) {
+      io.to(user.channel).emit("updateUserList", users.getUserList(user.channel));
+      io.to(user.channel).emit("newMessage", generateMessage(
+        "Admin",
+        `${user.name} has left the channel`
+      ));
+    }
   });
 });
 
