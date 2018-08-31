@@ -31,7 +31,7 @@ io.on("connection", (socket) => {
     socket.join(params.channel);
 
     // Update users list:
-    users.removeUser(socket.id);  // user can be in only one room??
+    users.removeUser(socket.id);  // user can be in only one room
     users.addUser(socket.id, params.name, params.channel);
     io.to(params.channel).emit("updateUserList", users.getUserList(params.channel));
 
@@ -51,21 +51,26 @@ io.on("connection", (socket) => {
   });
 
   socket.on("createMessage", (msg, callback) => {
-    console.log(msg);
-    // io.emit sends it to everyone:
-    io.emit("newMessage", generateMessage(
-      msg.from,
-      msg.text
-    ));
+    let user = users.getUser(socket.id);
+    if (user && isRealString(msg.text)) {
+      // io.emit sends it to everyone:
+      io.to(user.channel).emit("newMessage", generateMessage(
+        user.name,
+        msg.text
+      ));
+    }
     callback();
   });
 
   socket.on("createLocationMessage", (coords) => {
-    io.emit("newLocationMessage", generateLocationMessage(
-      "Admin",
-      coords.latitude,
-      coords.longitude
-    ));
+    let user = users.getUser(socket.id);
+    if (user) {
+      io.to(user.channel).emit("newLocationMessage", generateLocationMessage(
+        user.name,
+        coords.latitude,
+        coords.longitude
+      ));
+    }
   });
 
   socket.on("disconnect", () => {
