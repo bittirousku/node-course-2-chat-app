@@ -21,6 +21,17 @@ function scrollToBottom () {
 
 socket.on("connect", function () {
   console.log("Connected to server.");
+  let params = jQuery.deparam(window.location.search);  // some kind of hack
+
+  socket.emit("join", params, function (error) {
+    if (error) {
+      alert(error);
+      window.location.href = "/";
+    } else {
+      console.log("parametrit:", params);
+      console.log("No error in joining channel.");
+    }
+  });
 });
 
 socket.on("disconnect", function () {
